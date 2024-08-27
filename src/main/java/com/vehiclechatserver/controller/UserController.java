@@ -20,6 +20,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 注册
+     * 
+     * @param user 用户信息
+     * @return {@link Result}
+     */
     @PostMapping("/register")
     public Result register(@RequestBody User user) {
         if (user.getUsername() == null || user.getPassword() == null)
@@ -31,6 +37,12 @@ public class UserController {
             return ResultUtils.error("注册失败，用户名重复");
     }
 
+    /**
+     * 登陆
+     * 
+     * @param user 用户信息
+     * @return {@link Result}
+     */
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
         if (user.getUsername() == null || user.getPassword() == null)
