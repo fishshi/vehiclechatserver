@@ -9,12 +9,15 @@ import com.vehiclechatserver.utils.JwtUtils;
 import com.vehiclechatserver.utils.ResultUtils;
 import com.vehiclechatserver.utils.SHA256Utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+@Slf4j
 @RestController
 public class UserController {
     @Autowired
@@ -28,6 +31,7 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result register(@RequestBody User user) {
+        log.info("register : " + user.toString());
         if (user.getUsername() == null || user.getPassword() == null)
             return ResultUtils.error("缺失参数");
         user.setPassword(SHA256Utils.sha256(user.getPassword()));
@@ -45,6 +49,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
+        log.info("login : " + user.toString());
         if (user.getUsername() == null || user.getPassword() == null)
             return ResultUtils.error("缺失参数");
         user.setPassword(SHA256Utils.sha256(user.getPassword()));

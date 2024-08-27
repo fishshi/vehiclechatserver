@@ -2,6 +2,7 @@ package com.vehiclechatserver.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * 封装返回结果
@@ -14,6 +15,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@ToString
 public class Result {
     private int code;
     private String message;

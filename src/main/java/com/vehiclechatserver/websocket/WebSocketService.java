@@ -14,7 +14,9 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ServerEndpoint(value = "/chat/{token}")
 @Component
 public class WebSocketService {
@@ -40,12 +42,15 @@ public class WebSocketService {
         connectionSet.add(this);
         connectionNum.getAndIncrement();
         sendMessage(systemMessage + this.username + "连接成功");
+        log.info(this.username + "连接成功");
         sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
+        log.info("当前在线" + connectionNum.get() + "人");
     }
 
     @OnClose
     public void onClose(Session session) throws IOException {
         connectionNum.getAndDecrement();
+        log.info(this.username + "断开连接");
         connectionSet.remove(this);
     }
 
@@ -57,5 +62,6 @@ public class WebSocketService {
                 service.sendMessage(this.username + "：" + message);
             }
         }
+        log.info(this.username + "：" + message);
     }
 }

@@ -2,6 +2,7 @@ package com.vehiclechatserver.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * @author fishshi
@@ -12,6 +13,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@ToString
 public class User {
     private int id;
     private String username;
