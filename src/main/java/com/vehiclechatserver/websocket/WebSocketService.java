@@ -39,20 +39,14 @@ public class WebSocketService {
         this.session = session;
         connectionSet.add(this);
         connectionNum.getAndIncrement();
-        for (WebSocketService service : connectionSet) {
-            service.sendMessage(systemMessage + this.username + "连接成功");
-            service.sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
-        }
+        sendMessage(systemMessage + this.username + "连接成功");
+        sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
     }
 
     @OnClose
     public void onClose(Session session) throws IOException {
         connectionNum.getAndDecrement();
         connectionSet.remove(this);
-        for (WebSocketService service : connectionSet) {
-            service.sendMessage(systemMessage + this.username + "断开连接");
-            service.sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
-        }
     }
 
     @OnMessage
