@@ -1,6 +1,8 @@
 package com.vehiclechatserver.websocket;
 
 import java.io.IOException;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.stereotype.Component;
 
@@ -16,29 +18,50 @@ import jakarta.websocket.server.ServerEndpoint;
 @ServerEndpoint(value = "/chat/{token}")
 @Component
 public class WebSocketService {
-    private static int numConnections = 0;
+    private static AtomicInteger connectionNum = new AtomicInteger(0);
+    private static CopyOnWriteArraySet<WebSocketService> connectionSet = new CopyOnWriteArraySet<>();
+    private static final String systemMessage = "系统消息：";
+
+    private Session session;
+    private String username;
+
+    public void sendMessage(String message) throws IOException {
+        session.getBasicRemote().sendText(message);
+    }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) throws IOException {
         try {
-            JwtUtils.parseJwt(token);
+            username = (String) JwtUtils.parseJwt(token).get("username");
         } catch (Exception e) {
             session.close();
         }
-        ++numConnections;
-        session.getBasicRemote().sendText("连接成功");
-        session.getBasicRemote().sendText("当前在线" + numConnections + "人");
-        System.out.println("WebSocket opened");
+        this.session = session;
+        connectionSet.add(this);
+        connectionNum.getAndIncrement();
+        for (WebSocketService service : connectionSet) {
+            service.sendMessage(systemMessage + this.username + "连接成功");
+            service.sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
+        }
     }
 
     @OnClose
-    public void onClose(Session session) {
-        --numConnections;
-        System.out.println("WebSocket closed");
+    public void onClose(Session session) throws IOException {
+        connectionNum.getAndDecrement();
+        connectionSet.remove(this);
+        for (WebSocketService service : connectionSet) {
+            service.sendMessage(systemMessage + this.username + "断开连接");
+            service.sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
+        }
     }
 
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-        session.getBasicRemote().sendText("收到");
+        // sendMessage(systemMessage + "收到");
+        for (WebSocketService service : connectionSet) {
+            if (service != this) {
+                service.sendMessage(this.username + "：" + message);
+            }
+        }
     }
 }
