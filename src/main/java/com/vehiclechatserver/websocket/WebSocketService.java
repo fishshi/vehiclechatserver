@@ -31,27 +31,38 @@ public class WebSocketService {
         session.getBasicRemote().sendText(message);
     }
 
+    public void synchronizeConnectionNum() throws IOException {
+        sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
+    }
+
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) throws IOException {
         try {
             username = (String) JwtUtils.parseJwt(token).get("username");
+            this.session = session;
+            connectionSet.add(this);
+            connectionNum.getAndIncrement();
+            sendMessage(systemMessage + this.username + "连接成功");
+            log.info(this.username + "连接成功");
+            log.info("当前在线" + connectionNum.get() + "人");
+            for (WebSocketService service : connectionSet) {
+                service.sendMessage("当前在线" + connectionNum.get() + "人");
+            }
         } catch (Exception e) {
+            log.info(this.username + "连接失败");
             session.close();
         }
-        this.session = session;
-        connectionSet.add(this);
-        connectionNum.getAndIncrement();
-        sendMessage(systemMessage + this.username + "连接成功");
-        log.info(this.username + "连接成功");
-        sendMessage(systemMessage + "当前在线" + connectionNum.get() + "人");
-        log.info("当前在线" + connectionNum.get() + "人");
     }
 
     @OnClose
     public void onClose(Session session) throws IOException {
         connectionNum.getAndDecrement();
-        log.info(this.username + "断开连接");
         connectionSet.remove(this);
+        log.info(this.username + "断开连接");
+        log.info("当前在线" + connectionNum.get() + "人");
+        for (WebSocketService service : connectionSet) {
+            service.sendMessage("当前在线" + connectionNum.get() + "人");
+        }
     }
 
     @OnMessage
