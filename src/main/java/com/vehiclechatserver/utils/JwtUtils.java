@@ -17,12 +17,12 @@ public class JwtUtils {
     /**
      * 签名密钥
      */
-    private static final SecretKey signKey = Keys.hmacShaKeyFor("SIGNKEY_OF_SMARTEDUCATION_SYSTEM".getBytes());
+    private static final SecretKey signKey = Keys.hmacShaKeyFor("SIGNKEY_OF_VEHICLECHATSERVER_SYSTEM".getBytes());
 
     /**
      * 令牌过期时间，单位：秒
      */
-    private static final Long expire = 86400L;
+    private static final Long expire = 60 * 60 * 24L;
 
     /**
      * 生成Jwt令牌

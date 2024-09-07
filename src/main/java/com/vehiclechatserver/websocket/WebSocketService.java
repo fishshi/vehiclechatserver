@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.vehiclechatserver.dao.MessageDao;
+import com.vehiclechatserver.pojo.Message;
 import com.vehiclechatserver.utils.JwtUtils;
+import com.vehiclechatserver.utils.SpringContextUtils;
 
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
@@ -24,6 +28,8 @@ public class WebSocketService {
     private static CopyOnWriteArraySet<WebSocketService> connectionSet = new CopyOnWriteArraySet<>();
     private static final String systemMessage = "系统消息：";
 
+    private MessageDao messageDao;
+
     private Session session;
     private String username;
 
@@ -38,6 +44,7 @@ public class WebSocketService {
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) throws IOException {
         try {
+            this.messageDao = SpringContextUtils.getBean(MessageDao.class);
             username = (String) JwtUtils.parseJwt(token).get("username");
             this.session = session;
             connectionSet.add(this);
@@ -74,5 +81,6 @@ public class WebSocketService {
             }
         }
         log.info(this.username + "：" + message);
+        messageDao.addMessage(new Message(0, this.username, message, null));
     }
 }
